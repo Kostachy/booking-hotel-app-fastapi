@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Бронирование</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Набронировал</title>
 </head>
 <body>
-    <h1>HELLO</h1>
+    <div>
+        {% for hotel in hotels %}
+            <div>
+                <h1>{{hotel.name}}</h1>
+                <h4>{{hotel.location}}</h4>
+            </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
