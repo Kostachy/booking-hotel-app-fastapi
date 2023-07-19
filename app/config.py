@@ -15,6 +15,19 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
 
+    REDIS_PORT: str
+    REDIS_HOST: str
+    REDIS_PASS: str
+
+    @property
+    def REDIS_URL(self):
+        return f'redis://:{self.REDIS_PASS}@{self.REDIS_HOST}:{self.REDIS_PORT}'
+
+    SMTP_HOST: str
+    SMTP_PORT: str
+    SMTP_USER: str
+    SMTP_PASS: str
+
     class Config:
         env_file = '.env'
 
