@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from sqladmin import Admin, ModelView
 
+from app.admin.views import UserAdmin, BookingsAdmin
 from app.config import settings
+from app.database import engine
+from app.user.models import Users
 from app.user.router import router as user_router
 from app.bookings.router import router as booking_router
 from app.pages.router import router as page_router
@@ -26,7 +30,6 @@ app.include_router(booking_router)
 app.include_router(page_router)
 app.include_router(image_router)
 
-
 origins = ['http://localhost:3000']
 
 app.add_middleware(
@@ -44,3 +47,8 @@ app.add_middleware(
 async def startup():
     redis = aioredis.from_url(settings.REDIS_URL)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+
+
+admin = Admin(app, engine)
+admin.add_view(UserAdmin)
+admin.add_view(BookingsAdmin)

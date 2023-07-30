@@ -1,11 +1,10 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from pydantic import parse_obj_as
 
-# from app.bookings.schema import SBooking
 from app.bookings.dao import BookingDAO
-from app.bookings.schema import SBooking
+from app.bookings.schema import SNewBooking
 from app.exception import RoomCannotBeBooked
 from app.tasks.app_tasks import send_booking_confirm_email
 from app.user.dependencies import get_current_user
@@ -23,17 +22,18 @@ async def get_bookings(user: Users = Depends(get_current_user)):
 
 
 @router.post('')
-async def add_bookings(room_id: int,
-                       date_from: date,
-                       date_to: date,
-                       user: Users = Depends(get_current_user)
-                       ):
+async def add_bookings(
+        room_id: int,
+        date_from: date,
+        date_to: date,
+        user: Users = Depends(get_current_user)
+):
     bookings = await BookingDAO.add(user.id, room_id, date_from, date_to)
     if not bookings:
         raise RoomCannotBeBooked
-    booking_dict = parse_obj_as(SBooking, bookings).dict()
+    bookings = parse_obj_as(SNewBooking, bookings).dict()
     send_booking_confirm_email.delay(bookings, user.email)
-    return booking_dict
+    return bookings
 
 
 @router.get('/{us_id}')

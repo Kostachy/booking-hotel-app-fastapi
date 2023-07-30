@@ -14,3 +14,9 @@ class SBooking(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class SNewBooking(BaseModel):
+    room_id: int
+    date_from: date
+    date_to: date
