@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from sqladmin import Admin, ModelView
+from sqladmin import Admin
 
+from app.admin.auth import authentication_backend
 from app.admin.views import UsersAdmin, HotelsAdmin, RoomsAdmin, BookingsAdmin
 from app.config import settings
 from app.database import engine
-from app.user.models import Users
 from app.user.router import router as user_router
 from app.bookings.router import router as booking_router
 from app.pages.router import router as page_router
@@ -49,7 +49,7 @@ async def startup():
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
 
-admin = Admin(app, engine)
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 admin.add_view(UsersAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
