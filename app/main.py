@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin, ModelView
 
-from app.admin.views import UserAdmin, BookingsAdmin
+from app.admin.views import UsersAdmin, HotelsAdmin, RoomsAdmin, BookingsAdmin
 from app.config import settings
 from app.database import engine
 from app.user.models import Users
@@ -50,5 +50,7 @@ async def startup():
 
 
 admin = Admin(app, engine)
-admin.add_view(UserAdmin)
+admin.add_view(UsersAdmin)
+admin.add_view(HotelsAdmin)
+admin.add_view(RoomsAdmin)
 admin.add_view(BookingsAdmin)
