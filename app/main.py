@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
@@ -53,3 +54,8 @@ admin.add_view(UsersAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
 admin.add_view(BookingsAdmin)
+
+
+@app.get("/")
+async def root():
+    return HTMLResponse('---SOON---')
