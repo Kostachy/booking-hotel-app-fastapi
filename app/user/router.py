@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
+from fastapi import APIRouter, Response, Depends
 
-from app.user.auth import get_password_hash, verify_password, authenticate_user, create_access_token
+from app.user.auth import get_password_hash, authenticate_user, create_access_token
 from app.user.dao import UsersDAO
 from app.user.dependencies import get_current_user
 from app.user.models import Users

@@ -16,7 +16,6 @@ from app.images.router import router as image_router
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-
 from redis import asyncio as aioredis
 
 app = FastAPI(title='BookingAPI', description='API for booking hotels in your city')

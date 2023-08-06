@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends
 from pydantic import parse_obj_as
 
 from app.bookings.dao import BookingDAO
@@ -39,3 +39,8 @@ async def add_bookings(
 @router.get('/{us_id}')
 async def get_id(us_id: int):
     return await BookingDAO.get_by_id(us_id)
+
+
+@router.delete("/{booking_id}")
+async def remove_booking(booking_id: int, current_user: Users = Depends(get_current_user)):
+    await BookingDAO.delete(id=booking_id, user_id=current_user.id)
