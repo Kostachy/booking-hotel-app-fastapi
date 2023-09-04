@@ -8,6 +8,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from sqladmin import Admin
+from fastapi_versioning import VersionedFastAPI
 
 from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
@@ -23,7 +24,6 @@ from app.user.router import router as user_router
 
 app = FastAPI(title='BookingAPI', description='API for booking hotels in your city')
 
-app.mount('/static', StaticFiles(directory='app/static'), 'static')
 
 app.include_router(hotel_router)
 app.include_router(rooms_router)
@@ -61,6 +61,18 @@ async def add_process_time_header(request: Request, call_next):
     })
     return response
 
+@app.get("/")
+async def root():
+    return HTMLResponse('---SOON---')
+
+app = VersionedFastAPI(app,
+    version_format='{major}',
+    prefix_format='/v{major}')
+    # description='Greet users with a nice message',
+    # middleware=[
+    #     Middleware(SessionMiddleware, secret_key='mysecretkey')]
+
+app.mount('/static', StaticFiles(directory='app/static'), 'static')
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 admin.add_view(UsersAdmin)
@@ -68,7 +80,3 @@ admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
 admin.add_view(BookingsAdmin)
 
-
-@app.get("/")
-async def root():
-    return HTMLResponse('---SOON---')

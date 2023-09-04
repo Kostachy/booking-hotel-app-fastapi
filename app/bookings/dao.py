@@ -1,12 +1,14 @@
 from datetime import date
 
 from sqlalchemy import and_, func, insert, or_, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.bookings.models import Bookings
 from app.dao.base import BaseDAO
-from app.database import async_session_maker
+from app.database import async_session_maker, engine
 from app.exception import RoomFullyBooked
 from app.hotels.rooms.model import Rooms
+from app.logger import logger
 
 
 class BookingDAO(BaseDAO):
@@ -17,7 +19,6 @@ class BookingDAO(BaseDAO):
         async with async_session_maker() as session:
             query = (
                 select(
-                    # __table__.columns нужен для отсутствия вложенности в ответе Алхимии
                     Bookings.__table__.columns,
                     Rooms.__table__.columns,
                 )
@@ -29,12 +30,13 @@ class BookingDAO(BaseDAO):
 
     @classmethod
     async def add(
-        cls,
-        user_id: int,
-        room_id: int,
-        date_from: date,
-        date_to: date,
+            cls,
+            user_id: int,
+            room_id: int,
+            date_from: date,
+            date_to: date,
     ):
+        # """
         # WITH booked_rooms AS (
         #     SELECT * FROM bookings
         #     WHERE room_id = 1 AND
@@ -45,6 +47,7 @@ class BookingDAO(BaseDAO):
         # LEFT JOIN booked_rooms ON booked_rooms.room_id = rooms.id
         # WHERE rooms.id = 1
         # GROUP BY rooms.quantity, booked_rooms.room_id
+        # """
         try:
             async with async_session_maker() as session:
                 booked_rooms = (
@@ -67,11 +70,6 @@ class BookingDAO(BaseDAO):
                     .cte("booked_rooms")
                 )
 
-                # SELECT rooms.quantity - COUNT(booked_rooms.room_id) FROM rooms
-                # LEFT JOIN booked_rooms ON booked_rooms.room_id = rooms.id
-                # WHERE rooms.id = 1
-                # GROUP BY rooms.quantity, booked_rooms.room_id
-
                 get_rooms_left = (
                     select(
                         (Rooms.quantity - func.count(booked_rooms.c.room_id)).label(
@@ -79,15 +77,17 @@ class BookingDAO(BaseDAO):
                         )
                     )
                     .select_from(Rooms)
-                    .join(
-                        booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True
-                    )
+                    .join(booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True)
                     .where(Rooms.id == room_id)
                     .group_by(Rooms.quantity, booked_rooms.c.room_id)
                 )
 
+                logger.debug(get_rooms_left.compile(engine, compile_kwargs={"literal_binds": True}))
+
                 rooms_left = await session.execute(get_rooms_left)
                 rooms_left: int = rooms_left.scalar()
+
+                logger.debug(f"{rooms_left=}")
 
                 if rooms_left > 0:
                     get_price = select(Rooms.price).filter_by(id=room_id)
@@ -102,7 +102,13 @@ class BookingDAO(BaseDAO):
                             date_to=date_to,
                             price=price,
                         )
-                        .returning(Bookings)
+                        .returning(
+                            Bookings.id,
+                            Bookings.user_id,
+                            Bookings.room_id,
+                            Bookings.date_from,
+                            Bookings.date_to,
+                        )
                     )
 
                     new_booking = await session.execute(add_booking)
@@ -112,3 +118,15 @@ class BookingDAO(BaseDAO):
                     raise RoomFullyBooked
         except RoomFullyBooked:
             raise RoomFullyBooked
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = "Database Exc: Cannot add booking"
+            elif isinstance(e, Exception):
+                msg = "Unknown Exc: Cannot add booking"
+            extra = {
+                "user_id": user_id,
+                "room_id": room_id,
+                "date_from": date_from,
+                "date_to": date_to,
+            }
+            logger.error(msg, extra=extra, exc_info=True)
