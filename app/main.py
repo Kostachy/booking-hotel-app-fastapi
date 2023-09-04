@@ -1,23 +1,22 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from sqladmin import Admin
-
-from app.admin.auth import authentication_backend
-from app.admin.views import UsersAdmin, HotelsAdmin, RoomsAdmin, BookingsAdmin
-from app.config import settings
-from app.database import engine
-from app.user.router import router as user_router
-from app.bookings.router import router as booking_router
-from app.pages.router import router as page_router
-from app.hotels.router import router as hotel_router
-from app.hotels.rooms.router import router as rooms_router
-from app.images.router import router as image_router
-
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
+from sqladmin import Admin
+
+from app.admin.auth import authentication_backend
+from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
+from app.bookings.router import router as booking_router
+from app.config import settings
+from app.database import engine
+from app.hotels.rooms.router import router as rooms_router
+from app.hotels.router import router as hotel_router
+from app.images.router import router as image_router
+from app.pages.router import router as page_router
+from app.user.router import router as user_router
 
 app = FastAPI(title='BookingAPI', description='API for booking hotels in your city')
 

@@ -1,5 +1,6 @@
+from datetime import date, datetime
+
 from pydantic import BaseModel
-from datetime import datetime, date
 
 
 class SBooking(BaseModel):
