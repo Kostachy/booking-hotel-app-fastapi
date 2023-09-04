@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+import time
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,6 +17,7 @@ from app.database import engine
 from app.hotels.rooms.router import router as rooms_router
 from app.hotels.router import router as hotel_router
 from app.images.router import router as image_router
+from app.logger import logger
 from app.pages.router import router as page_router
 from app.user.router import router as user_router
 
@@ -46,6 +49,17 @@ app.add_middleware(
 async def startup():
     redis = aioredis.from_url(settings.REDIS_URL)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info("Request handling time", extra={
+        "procces_time": round(process_time, 4)
+    })
+    return response
 
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
