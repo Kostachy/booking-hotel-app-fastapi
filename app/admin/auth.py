@@ -16,7 +16,6 @@ class AdminAuth(AuthenticationBackend):
         if user:
             access_token = create_access_token({"sub": str(user.id)})
             request.session.update({"token": access_token})
-
         return True
 
     async def logout(self, request: Request) -> bool:

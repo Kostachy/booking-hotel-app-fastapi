@@ -1,0 +1,3 @@
+[tool.black]
+ine-length = 88
+target-versions = ["py310"]

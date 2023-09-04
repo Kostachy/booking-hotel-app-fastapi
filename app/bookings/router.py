@@ -36,9 +36,9 @@ async def add_bookings(
     return bookings
 
 
-@router.get('/{us_id}')
-async def get_id(us_id: int):
-    return await BookingDAO.get_by_id(us_id)
+@router.get('/{booking_id}')
+async def get_booking_by_id(booking_id: int):
+    return await BookingDAO.get_by_id(booking_id)
 
 
 @router.delete("/{booking_id}")
