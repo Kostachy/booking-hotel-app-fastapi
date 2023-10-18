@@ -1,3 +1,11 @@
 # booking_hotel_app_fastapi
-...soon...
-<a>hello</a>
+Tech stack:
+
+* Python 3.10
+* FastAPI
+* PostgreSQL + SQLAlchemy + asyncpg driver + alembic
+* Redis for caching 
+* Celery
+* Docker + docker-compose
+
+
