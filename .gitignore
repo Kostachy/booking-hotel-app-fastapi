@@ -121,6 +121,7 @@
 
     # Environments
     .env
+    .env-non-dev
     .venv
     env/
     venv/
